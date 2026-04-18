@@ -8,6 +8,7 @@ slash commands, and agents the team uses against Salesforce.
 | Plugin | Status | What it does |
 |---|---|---|
 | [account-dashboard](plugins/account-dashboard) | ✅ Ready | Generates a single-file HTML executive dashboard for any Billing partner account in Salesforce. |
+| [account-dashboard-ops](plugins/account-dashboard-ops) | ✅ Ready | Operations / work-list sibling of account-dashboard. Tab-based: unactivated patients, OOP-call backlog, pre-auth pending, in-manufacturing, dental letter, impression kits, bad impressions. |
 | [pre-d-prospecting](plugins/pre-d-prospecting) | 🚧 WIP — Dan only | Daily physician prospecting from today's Salesforce sleep test results. Contains hardcoded paths to Dan's machine; not yet portable. Do not install. |
 
 ## Install (for teammates)
@@ -15,8 +16,9 @@ slash commands, and agents the team uses against Salesforce.
 Once this repo is pushed to GitHub (private is fine), teammates run:
 
 ```
-/plugin marketplace add DaybreakMD/daybreak-claude-marketplace
+/plugin marketplace add Danthamango/daybreak-claude-marketplace
 /plugin install account-dashboard@DaybreakMD
+/plugin install account-dashboard-ops@DaybreakMD
 ```
 
 To get updates later:
@@ -24,6 +26,7 @@ To get updates later:
 ```
 /plugin marketplace update DaybreakMD
 /plugin update account-dashboard@DaybreakMD
+/plugin update account-dashboard-ops@DaybreakMD
 ```
 
 ## Per-plugin prerequisites
