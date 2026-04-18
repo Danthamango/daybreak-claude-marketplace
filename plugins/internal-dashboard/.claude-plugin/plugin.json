@@ -1,0 +1,10 @@
+{
+  "name": "internal-dashboard",
+  "version": "0.1.0",
+  "description": "DaybreakMD internal morning dashboard — single self-contained HTML file for the Daybreak team with patient-level detail, period comparisons, tabbed layout, and client-side filters. Internal use only; not for external partners.",
+  "author": {
+    "name": "DaybreakMD",
+    "email": "dan@thedaybreak.com"
+  },
+  "keywords": ["salesforce", "dashboard", "internal", "morning-briefing", "worklist"]
+}

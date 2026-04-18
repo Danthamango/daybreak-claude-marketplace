@@ -32,6 +32,28 @@
       }
     },
     {
+      "name": "internal-dashboard",
+      "source": "./plugins/internal-dashboard",
+      "description": "DaybreakMD internal morning dashboard (single self-contained HTML file) for the Daybreak team. Tabbed layout: Morning Briefing, Action Queue, Recent Activity, Accounts, All Patients. Period comparisons (Today / Yesterday / 7d / MTD) and client-side filters. Internal use only — shows full patient names with Salesforce links.",
+      "version": "0.1.0",
+      "category": "reporting",
+      "tags": ["salesforce", "dashboard", "internal", "morning-briefing", "worklist"],
+      "author": {
+        "name": "DaybreakMD"
+      }
+    },
+    {
+      "name": "partner-report",
+      "source": "./plugins/partner-report",
+      "description": "DaybreakMD weekly/monthly partner reports — one styled HTML report per Location account with Executive rollup + Operations stuck-patient sections. Saved locally for review before manual send. PHI-safe identifiers.",
+      "version": "0.1.0",
+      "category": "reporting",
+      "tags": ["salesforce", "partner", "report", "external", "phi-safe"],
+      "author": {
+        "name": "DaybreakMD"
+      }
+    },
+    {
       "name": "pre-d-prospecting",
       "source": "./plugins/pre-d-prospecting",
       "description": "[WIP — Dan only] Automated physician prospecting pipeline. Pulls today's sleep test results from Salesforce, parses each PDF for the referring/interpreting physician + AHI severity, enriches via Apollo.io, and drafts personalized outreach emails. NOT YET PORTABLE — contains hardcoded paths to Dan's machine; do not install.",

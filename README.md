@@ -9,6 +9,8 @@ slash commands, and agents the team uses against Salesforce.
 |---|---|---|
 | [account-dashboard](plugins/account-dashboard) | ✅ Ready | Generates a single-file HTML executive dashboard for any Billing partner account in Salesforce. |
 | [account-dashboard-ops](plugins/account-dashboard-ops) | ✅ Ready | Operations / work-list sibling of account-dashboard. Tab-based: unactivated patients, OOP-call backlog, pre-auth pending, in-manufacturing, dental letter, impression kits, bad impressions. |
+| [internal-dashboard](plugins/internal-dashboard) | ✅ Ready | Internal morning dashboard for the Daybreak team. Shows full patient names with Salesforce links. Tabs: Morning Briefing, Action Queue, Recent Activity, Accounts, All Patients. |
+| [partner-report](plugins/partner-report) | ✅ Ready | Weekly/monthly partner reports — one styled HTML per Location account with Executive rollup + Operations stuck-patient sections. PHI-safe. |
 | [pre-d-prospecting](plugins/pre-d-prospecting) | 🚧 WIP — Dan only | Daily physician prospecting from today's Salesforce sleep test results. Contains hardcoded paths to Dan's machine; not yet portable. Do not install. |
 
 ## Install (for teammates)
@@ -19,6 +21,8 @@ Once this repo is pushed to GitHub (private is fine), teammates run:
 /plugin marketplace add Danthamango/daybreak-claude-marketplace
 /plugin install account-dashboard@DaybreakMD
 /plugin install account-dashboard-ops@DaybreakMD
+/plugin install internal-dashboard@DaybreakMD
+/plugin install partner-report@DaybreakMD
 ```
 
 To get updates later:

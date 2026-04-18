@@ -1,0 +1,10 @@
+{
+  "name": "partner-report",
+  "version": "0.1.0",
+  "description": "DaybreakMD weekly/monthly partner reports — one styled HTML report per Location account with Executive rollup + Operations stuck-patient sections. Saved locally for review before manual send. PHI-safe patient identifiers.",
+  "author": {
+    "name": "DaybreakMD",
+    "email": "dan@thedaybreak.com"
+  },
+  "keywords": ["salesforce", "partner", "report", "external", "phi-safe"]
+}
