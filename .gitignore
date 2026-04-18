@@ -1,0 +1,18 @@
+# Runtime / build artifacts
+node_modules/
+output/
+*.log
+
+# Editor / OS
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Never commit secrets
+.env
+.env.*
+*.pem
+*.key
+credentials*
+secrets*

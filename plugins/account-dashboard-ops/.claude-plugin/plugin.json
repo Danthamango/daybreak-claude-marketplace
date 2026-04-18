@@ -1,0 +1,10 @@
+{
+  "name": "account-dashboard-ops",
+  "version": "0.1.0",
+  "description": "DaybreakMD operations dashboard for any Billing partner account in Salesforce — tab-based, action-focused work-list. Surfaces unactivated patients, OOP-call backlog, pre-auth pending, in-manufacturing, dental-letter-required, impression-kit status, and bad impressions. Sibling to account-dashboard (executive view).",
+  "author": {
+    "name": "DaybreakMD",
+    "email": "dan@thedaybreak.com"
+  },
+  "keywords": ["salesforce", "dashboard", "partner", "operations", "worklist"]
+}

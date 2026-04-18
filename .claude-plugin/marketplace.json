@@ -1,0 +1,46 @@
+{
+  "name": "DaybreakMD",
+  "owner": {
+    "name": "DaybreakMD",
+    "email": "dan@thedaybreak.com"
+  },
+  "metadata": {
+    "description": "DaybreakMD internal Claude Code plugins — Salesforce reporting, partner dashboards, prospecting workflows.",
+    "version": "0.1.0"
+  },
+  "plugins": [
+    {
+      "name": "account-dashboard",
+      "source": "./plugins/account-dashboard",
+      "description": "DaybreakMD executive dashboard (single self-contained HTML file) for any Billing partner account in Salesforce. KPIs, SLA averages, trend chart, and per-patient tables, all client-side filterable by scope and time window.",
+      "version": "0.1.1",
+      "category": "reporting",
+      "tags": ["salesforce", "dashboard", "partner", "phi-safe"],
+      "author": {
+        "name": "DaybreakMD"
+      }
+    },
+    {
+      "name": "account-dashboard-ops",
+      "source": "./plugins/account-dashboard-ops",
+      "description": "DaybreakMD operations dashboard (single self-contained HTML file) for any Billing partner account in Salesforce. Tab-based work-list: unactivated patients, OOP-call backlog, pre-auth pending, in-manufacturing, dental-letter-required, impression-kit status, bad impressions. Sibling to account-dashboard (executive view).",
+      "version": "0.1.0",
+      "category": "reporting",
+      "tags": ["salesforce", "dashboard", "partner", "operations", "worklist", "phi-safe"],
+      "author": {
+        "name": "DaybreakMD"
+      }
+    },
+    {
+      "name": "pre-d-prospecting",
+      "source": "./plugins/pre-d-prospecting",
+      "description": "[WIP — Dan only] Automated physician prospecting pipeline. Pulls today's sleep test results from Salesforce, parses each PDF for the referring/interpreting physician + AHI severity, enriches via Apollo.io, and drafts personalized outreach emails. NOT YET PORTABLE — contains hardcoded paths to Dan's machine; do not install.",
+      "version": "0.0.1",
+      "category": "prospecting",
+      "tags": ["salesforce", "apollo", "outreach", "physician", "sleep", "wip"],
+      "author": {
+        "name": "DaybreakMD"
+      }
+    }
+  ]
+}

@@ -1,0 +1,10 @@
+{
+  "name": "account-dashboard",
+  "version": "0.1.1",
+  "description": "DaybreakMD executive dashboard for any Billing partner account in Salesforce — single self-contained HTML, client-side filterable.",
+  "author": {
+    "name": "DaybreakMD",
+    "email": "dan@thedaybreak.com"
+  },
+  "keywords": ["salesforce", "dashboard", "partner", "reporting"]
+}

@@ -1,0 +1,10 @@
+{
+  "name": "pre-d-prospecting",
+  "version": "0.1.0",
+  "description": "Automated physician prospecting pipeline. Pulls today's sleep test results from Salesforce, parses each PDF for the referring/interpreting physician + AHI severity, enriches via Apollo.io, and drafts personalized outreach emails per DaybreakMD copy rules.",
+  "author": {
+    "name": "DaybreakMD",
+    "email": "dan@thedaybreak.com"
+  },
+  "keywords": ["salesforce", "prospecting", "apollo", "outreach", "sleep"]
+}

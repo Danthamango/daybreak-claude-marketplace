@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>{{ACCOUNT_NAME}} — Operations Dashboard</title>
+<style>
+  :root {
+    --sunlight: #FECF00;
+    --deep-sleep: #221D35;
+    --pillow: #FFFFFF;
+    --sky: #DDE4ED;
+    --linen: #F6ECE1;
+    --muted: #6B6778;
+    --border: #E5E1E9;
+    --warn: #F4A53B;
+    --warn-bg: #FFF5E6;
+    --bad: #D94F4F;
+    --bad-bg: #FCEBEB;
+    --fresh-bg: #FFFBE6;
+    --ok: #3E9A60;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: var(--pillow); color: var(--deep-sleep); }
+  body {
+    font-family: Inter, system-ui, -apple-system, "Segoe UI", sans-serif;
+    font-size: 14px;
+    line-height: 1.45;
+  }
+  header.top {
+    background: var(--deep-sleep);
+    color: var(--pillow);
+    padding: 24px 32px;
+  }
+  header.top h1 {
+    margin: 0;
+    font-size: 22px;
+    font-weight: 600;
+    letter-spacing: 0.2px;
+  }
+  header.top h1 em {
+    font-family: Georgia, "Source Serif Pro", serif;
+    font-style: italic;
+    font-weight: 400;
+    border-bottom: 2px solid var(--sunlight);
+    padding-bottom: 1px;
+  }
+  header.top .meta {
+    font-size: 12px;
+    color: #B9B4C7;
+    margin-top: 6px;
+  }
+  .controls {
+    background: var(--linen);
+    border-bottom: 1px solid var(--border);
+    padding: 16px 32px;
+    display: flex;
+    gap: 32px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  .control-group { display: flex; align-items: center; gap: 8px; }
+  .control-group label {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--muted);
+  }
+  select {
+    background: var(--pillow);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 6px 10px;
+    font-size: 13px;
+    font-family: inherit;
+    color: var(--deep-sleep);
+    min-width: 200px;
+  }
+  main { padding: 24px 32px 48px; max-width: 1400px; margin: 0 auto; }
+  section { margin-bottom: 24px; }
+  h2.section {
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--muted);
+    margin: 0 0 12px;
+  }
+  .kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 12px;
+  }
+  .kpi {
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px 16px;
+    background: var(--pillow);
+    cursor: pointer;
+    transition: transform 0.08s ease, box-shadow 0.08s ease, border-color 0.08s ease;
+  }
+  .kpi:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(34,29,53,0.07); }
+  .kpi.active { border-color: var(--sunlight); box-shadow: 0 0 0 2px rgba(254,207,0,0.25); }
+  .kpi .label {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--muted);
+    font-weight: 600;
+  }
+  .kpi .value {
+    font-size: 30px;
+    font-weight: 600;
+    margin: 4px 0 0;
+    color: var(--deep-sleep);
+    font-variant-numeric: tabular-nums;
+  }
+  .kpi.alert .value { color: var(--bad); }
+  .tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2px;
+    border-bottom: 2px solid var(--border);
+    margin-bottom: 0;
+  }
+  .tab {
+    background: transparent;
+    border: 0;
+    padding: 10px 16px;
+    font-size: 13px;
+    font-weight: 500;
+    font-family: inherit;
+    color: var(--muted);
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -2px;
+  }
+  .tab:hover { color: var(--deep-sleep); }
+  .tab.active {
+    color: var(--deep-sleep);
+    border-bottom-color: var(--sunlight);
+    font-weight: 600;
+  }
+  .tab.bad { color: var(--bad); }
+  .tab.bad.active { border-bottom-color: var(--bad); color: var(--bad); }
+  .tab .badge {
+    display: inline-block;
+    background: var(--sky);
+    color: var(--deep-sleep);
+    border-radius: 10px;
+    padding: 1px 8px;
+    font-size: 11px;
+    margin-left: 6px;
+    font-weight: 600;
+  }
+  .tab.bad .badge { background: var(--bad-bg); color: var(--bad); }
+  .panel {
+    display: none;
+    border: 1px solid var(--border);
+    border-top: 0;
+    border-radius: 0 0 8px 8px;
+    background: var(--pillow);
+    overflow: hidden;
+  }
+  .panel.active { display: block; }
+  .panel-head {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+    background: #FAFAFC;
+  }
+  .panel-head .title { font-size: 14px; font-weight: 600; margin: 0; }
+  .panel-head .desc { font-size: 12px; color: var(--muted); margin-top: 2px; }
+  .legend {
+    display: inline-flex;
+    gap: 12px;
+    margin-left: 16px;
+    font-size: 11px;
+    color: var(--muted);
+  }
+  .legend .chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .legend .sw {
+    width: 10px;
+    height: 10px;
+    border-radius: 2px;
+    display: inline-block;
+  }
+  .t-scroll {
+    max-height: 520px;
+    overflow-y: auto;
+  }
+  table { width: 100%; border-collapse: collapse; }
+  th, td { padding: 8px 16px; text-align: left; font-size: 13px; }
+  th {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--muted);
+    font-weight: 600;
+    border-bottom: 1px solid var(--border);
+    background: #FAFAFC;
+    position: sticky;
+    top: 0;
+    z-index: 1;
+  }
+  tr + tr td { border-top: 1px solid #F0EDF2; }
+  td.num { text-align: right; font-variant-numeric: tabular-nums; }
+  tr.row-fresh td { background: var(--fresh-bg); }
+  tr.row-warn td { background: var(--warn-bg); }
+  tr.row-bad td { background: var(--bad-bg); }
+  tr.row-bad td:first-child { border-left: 3px solid var(--bad); padding-left: 13px; }
+  tr.row-warn td:first-child { border-left: 3px solid var(--warn); padding-left: 13px; }
+  tr.row-fresh td:first-child { border-left: 3px solid var(--sunlight); padding-left: 13px; }
+  .pill {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 11px;
+    font-weight: 600;
+  }
+  .pill.ok { background: #E6F3EC; color: var(--ok); }
+  .pill.warn { background: var(--warn-bg); color: var(--warn); }
+  .pill.bad { background: var(--bad-bg); color: var(--bad); }
+  .pill.neutral { background: var(--sky); color: var(--deep-sleep); }
+  .empty {
+    padding: 32px 16px;
+    text-align: center;
+    color: var(--muted);
+    font-size: 13px;
+  }
+  .empty strong { color: var(--ok); }
+  .ik-sub {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 0;
+  }
+  .ik-sub > div { border-right: 1px solid var(--border); }
+  .ik-sub > div:last-child { border-right: 0; }
+  .ik-sub h4 {
+    margin: 0;
+    padding: 10px 16px;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--muted);
+    background: #FAFAFC;
+    border-bottom: 1px solid var(--border);
+  }
+  .ik-sub h4 .n {
+    float: right;
+    color: var(--deep-sleep);
+    font-variant-numeric: tabular-nums;
+  }
+  .ik-sub .t-scroll { max-height: 480px; }
+  footer {
+    background: var(--linen);
+    padding: 16px 32px;
+    font-size: 12px;
+    color: var(--muted);
+    text-align: center;
+  }
+  @media (max-width: 1100px) {
+    .kpi-grid { grid-template-columns: repeat(3, 1fr); }
+    .ik-sub { grid-template-columns: 1fr; }
+    .ik-sub > div { border-right: 0; border-bottom: 1px solid var(--border); }
+  }
+  @media (max-width: 700px) {
+    .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+</style>
+</head>
+<body>
+<header class="top">
+  <h1>{{ACCOUNT_NAME}} <em>Operations Dashboard</em></h1>
+  <div class="meta" id="meta"></div>
+</header>
+
+<div class="controls">
+  <div class="control-group">
+    <label>Scope</label>
+    <select id="scope-select"></select>
+  </div>
+  <div class="legend">
+    <span class="chip"><span class="sw" style="background:var(--sunlight)"></span> new (&lt;7d)</span>
+    <span class="chip"><span class="sw" style="background:var(--warn)"></span> aging</span>
+    <span class="chip"><span class="sw" style="background:var(--bad)"></span> stuck</span>
+  </div>
+</div>
+
+<main>
+  <section>
+    <h2 class="section">Backlog — click a tile to jump to its tab</h2>
+    <div class="kpi-grid" id="kpi-grid">
+      <div class="kpi" data-tab="unactivated"><div class="label">Unactivated &gt;3d</div><div class="value" id="kpi-unact">—</div></div>
+      <div class="kpi" data-tab="unordered"><div class="label">Needs OOP call</div><div class="value" id="kpi-unord">—</div></div>
+      <div class="kpi" data-tab="preauth"><div class="label">Pre-auth pending</div><div class="value" id="kpi-preauth">—</div></div>
+      <div class="kpi" data-tab="mfg"><div class="label">In manufacturing</div><div class="value" id="kpi-mfg">—</div></div>
+      <div class="kpi alert" data-tab="badimp"><div class="label">Bad impressions</div><div class="value" id="kpi-bad">—</div></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="tabs" id="tabs">
+      <button class="tab active" data-tab="unactivated">Unactivated <span class="badge" id="b-unact">0</span></button>
+      <button class="tab" data-tab="unordered">Needs OOP call <span class="badge" id="b-unord">0</span></button>
+      <button class="tab" data-tab="preauth">Pre-auth pending <span class="badge" id="b-preauth">0</span></button>
+      <button class="tab" data-tab="mfg">In manufacturing <span class="badge" id="b-mfg">0</span></button>
+      <button class="tab" data-tab="dental">Dental letter <span class="badge" id="b-dental">0</span></button>
+      <button class="tab" data-tab="ik">Impression kit <span class="badge" id="b-ik">0</span></button>
+      <button class="tab bad" data-tab="badimp">Bad impressions <span class="badge" id="b-badimp">0</span></button>
+    </div>
+
+    <div class="panel active" id="panel-unactivated">
+      <div class="panel-head">
+        <div class="title">Unactivated patients</div>
+        <div class="desc">Submitted but have not completed Auth0 registration. <strong>Red</strong> = &gt;3 days. Newest first.</div>
+      </div>
+      <div class="t-scroll" id="t-unactivated"></div>
+    </div>
+
+    <div class="panel" id="panel-unordered">
+      <div class="panel-head">
+        <div class="title">Unordered — needs OOP call</div>
+        <div class="desc">Activated but <code>Patient_Consent_Hold_Released__c</code> = false. Collect out-of-pocket, then release consent hold. <strong>Red</strong> = &gt;7 days since activation.</div>
+      </div>
+      <div class="t-scroll" id="t-unordered"></div>
+    </div>
+
+    <div class="panel" id="panel-preauth">
+      <div class="panel-head">
+        <div class="title">Pre-auth pending</div>
+        <div class="desc">Consent released but <code>Pre_Authorization_Hold_Released__c</code> = false. Click to release once pre-auth is confirmed or not required. <strong>Red</strong> = &gt;5 days since order.</div>
+      </div>
+      <div class="t-scroll" id="t-preauth"></div>
+    </div>
+
+    <div class="panel" id="panel-mfg">
+      <div class="panel-head">
+        <div class="title">In manufacturing</div>
+        <div class="desc">Device is being built (not yet delivered). <strong>Red</strong> = &gt;21 days in manufacturing. Newest first.</div>
+      </div>
+      <div class="t-scroll" id="t-mfg"></div>
+    </div>
+
+    <div class="panel" id="panel-dental">
+      <div class="panel-head">
+        <div class="title">Dental letter required</div>
+        <div class="desc"><code>Absence_TMJD_Perio__c</code> = true. Insurance requires a dental letter confirming absence of TMJD/periodontal issues.</div>
+      </div>
+      <div class="t-scroll" id="t-dental"></div>
+    </div>
+
+    <div class="panel" id="panel-ik">
+      <div class="panel-head">
+        <div class="title">Impression kit status</div>
+        <div class="desc">Kit workflow: ordered → delivered to patient → returned to scanning facility. <strong>Red</strong> on middle column = kit at patient &gt;14 days (chase patient).</div>
+      </div>
+      <div class="ik-sub">
+        <div>
+          <h4>Ordered, not delivered <span class="n" id="n-ik1">0</span></h4>
+          <div class="t-scroll" id="t-ik1"></div>
+        </div>
+        <div>
+          <h4>Delivered, not returned <span class="n" id="n-ik2">0</span></h4>
+          <div class="t-scroll" id="t-ik2"></div>
+        </div>
+        <div>
+          <h4>Returned <span class="n" id="n-ik3">0</span></h4>
+          <div class="t-scroll" id="t-ik3"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel" id="panel-badimp">
+      <div class="panel-head" style="background: var(--bad-bg); border-bottom-color: var(--bad);">
+        <div class="title" style="color: var(--bad);">Bad impressions — replacement kits in flight</div>
+        <div class="desc">Molds returned were unusable; a fresh impression kit has been sent. Watch for the second attempt to come back clean.</div>
+      </div>
+      <div class="t-scroll" id="t-badimp"></div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  Better days start with better sleep. — Generated <span id="foot-gen"></span>
+</footer>
+
+<script>
+/*__DATA__*/
+
+(function () {
+  const data = window.__DASHBOARD_DATA__;
+  if (!data) return;
+
+  const MS_DAY = 86400000;
+  const now = Date.now();
+
+  const fmtDate = (iso) => {
+    if (!iso) return '—';
+    const d = new Date(iso);
+    return d.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+  };
+  const daysSince = (iso) => {
+    if (!iso) return null;
+    return Math.floor((now - new Date(iso).getTime()) / MS_DAY);
+  };
+  const rowClass = (days, warnAt, badAt) => {
+    if (days === null || days === undefined) return '';
+    if (days >= badAt) return 'row-bad';
+    if (days >= warnAt) return 'row-warn';
+    if (days < 7) return 'row-fresh';
+    return '';
+  };
+
+  function setupScope() {
+    const sel = document.getElementById('scope-select');
+    const states = [...new Set(data.scopes.locations.map(l => l.state))].filter(s => s && s !== 'Unknown').sort();
+    const opts = [
+      { v: 'all', t: 'All ' + data.account.name },
+      ...states.map(s => ({ v: 'state:' + s, t: 'State — ' + s })),
+      ...data.scopes.locations.map(l => ({ v: 'loc:' + l.id, t: l.state && l.state !== 'Unknown' ? l.name + ' (' + l.state + ')' : l.name })),
+    ];
+    sel.innerHTML = opts.map(o => '<option value="' + o.v + '">' + o.t + '</option>').join('');
+  }
+
+  function filterByScope(patients, scope) {
+    if (scope === 'all') return patients;
+    if (scope.startsWith('state:')) {
+      const s = scope.slice(6);
+      return patients.filter(p => p.state === s);
+    }
+    if (scope.startsWith('loc:')) {
+      const id = scope.slice(4);
+      return patients.filter(p => p.locId === id);
+    }
+    return patients;
+  }
+
+  function esc(s) {
+    if (s === null || s === undefined) return '';
+    return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  }
+
+  function tableHtml(rows, cols, rowCls) {
+    if (!rows.length) return '<div class="empty"><strong>Nothing here</strong> — no patients match this view.</div>';
+    const head = '<tr>' + cols.map(c => '<th>' + esc(c.h) + '</th>').join('') + '</tr>';
+    const body = rows.map(r => {
+      const cls = rowCls ? rowCls(r) : '';
+      const tds = cols.map(c => {
+        const v = c.fmt ? c.fmt(r) : r[c.k];
+        const attr = c.num ? ' class="num"' : '';
+        return '<td' + attr + '>' + (v == null ? '' : v) + '</td>';
+      }).join('');
+      return '<tr' + (cls ? ' class="' + cls + '"' : '') + '>' + tds + '</tr>';
+    }).join('');
+    return '<table><thead>' + head + '</thead><tbody>' + body + '</tbody></table>';
+  }
+
+  function render() {
+    const scope = document.getElementById('scope-select').value;
+    const inScope = filterByScope(data.patients, scope);
+
+    // --- Tab 1: Unactivated ---
+    const unact = inScope
+      .filter(p => p.submitted && !p.activated)
+      .map(p => ({ ...p, _days: daysSince(p.submitted) }))
+      .sort((a, b) => new Date(b.submitted) - new Date(a.submitted));
+    document.getElementById('t-unactivated').innerHTML = tableHtml(unact, [
+      { h: 'Patient', fmt: r => esc(r.id) },
+      { h: 'Location', fmt: r => esc(r.loc) },
+      { h: 'Submitted', fmt: r => fmtDate(r.submitted) },
+      { h: 'Days waiting', num: true, fmt: r => r._days },
+    ], r => rowClass(r._days, 3, 7));
+    document.getElementById('b-unact').textContent = unact.length;
+
+    // --- Tab 2: Unordered / needs OOP ---
+    const unord = inScope
+      .filter(p => p.activated && !p.ordered)
+      .map(p => ({ ...p, _days: daysSince(p.activated) }))
+      .sort((a, b) => new Date(b.activated) - new Date(a.activated));
+    document.getElementById('t-unordered').innerHTML = tableHtml(unord, [
+      { h: 'Patient', fmt: r => esc(r.id) },
+      { h: 'Location', fmt: r => esc(r.loc) },
+      { h: 'Submitted', fmt: r => fmtDate(r.submitted) },
+      { h: 'Activated', fmt: r => fmtDate(r.activated) },
+      { h: 'Days since activate', num: true, fmt: r => r._days },
+    ], r => rowClass(r._days, 3, 7));
+    document.getElementById('b-unord').textContent = unord.length;
+
+    // --- Tab 3: Pre-auth pending ---
+    const preauth = inScope
+      .filter(p => p.ordered && !p.preAuthReleased)
+      .map(p => ({ ...p, _days: daysSince(p.orderedDate) }))
+      .sort((a, b) => new Date(b.orderedDate || 0) - new Date(a.orderedDate || 0));
+    document.getElementById('t-preauth').innerHTML = tableHtml(preauth, [
+      { h: 'Patient', fmt: r => esc(r.id) },
+      { h: 'Location', fmt: r => esc(r.loc) },
+      { h: 'Ordered', fmt: r => fmtDate(r.orderedDate) },
+      { h: 'Days since order', num: true, fmt: r => r._days == null ? '—' : r._days },
+    ], r => rowClass(r._days, 3, 5));
+    document.getElementById('b-preauth').textContent = preauth.length;
+
+    // --- Tab 4: In manufacturing ---
+    const mfg = inScope
+      .filter(p => p.daysMfg !== null && !p.delivered)
+      .sort((a, b) => (a.daysMfg || 0) - (b.daysMfg || 0));
+    document.getElementById('t-mfg').innerHTML = tableHtml(mfg, [
+      { h: 'Patient', fmt: r => esc(r.id) },
+      { h: 'Location', fmt: r => esc(r.loc) },
+      { h: 'Ordered', fmt: r => fmtDate(r.orderedDate) },
+      { h: 'Days in mfg', num: true, fmt: r => r.daysMfg },
+    ], r => rowClass(r.daysMfg, 14, 21));
+    document.getElementById('b-mfg').textContent = mfg.length;
+
+    // --- Tab 5: Dental letter ---
+    const dental = inScope
+      .filter(p => p.dentalLetter)
+      .map(p => ({ ...p, _days: daysSince(p.submitted) }))
+      .sort((a, b) => new Date(b.submitted) - new Date(a.submitted));
+    document.getElementById('t-dental').innerHTML = tableHtml(dental, [
+      { h: 'Patient', fmt: r => esc(r.id) },
+      { h: 'Location', fmt: r => esc(r.loc) },
+      { h: 'Submitted', fmt: r => fmtDate(r.submitted) },
+      { h: 'Ordered?', fmt: r => r.ordered ? '<span class="pill ok">yes</span>' : '<span class="pill neutral">no</span>' },
+      { h: 'Delivered?', fmt: r => r.delivered ? '<span class="pill ok">yes</span>' : '<span class="pill neutral">no</span>' },
+    ], r => rowClass(r._days, 99999, 99999));
+    document.getElementById('b-dental').textContent = dental.length;
+
+    // --- Tab 6: Impression kit ---
+    const ikAll = inScope.filter(p => p.ikOrdered || p.ikDelivered || p.ikReturned);
+    const ik1 = ikAll
+      .filter(p => p.ikOrdered && !p.ikDelivered)
+      .map(p => ({ ...p, _days: daysSince(p.submitted) }))
+      .sort((a, b) => new Date(b.submitted || 0) - new Date(a.submitted || 0));
+    const ik2 = ikAll
+      .filter(p => p.ikDelivered && !p.ikReturned)
+      .map(p => ({ ...p, _days: daysSince(p.ikDelivered) }))
+      .sort((a, b) => new Date(b.ikDelivered) - new Date(a.ikDelivered));
+    const ik3 = ikAll
+      .filter(p => p.ikReturned)
+      .map(p => ({ ...p, _days: daysSince(p.ikReturned) }))
+      .sort((a, b) => new Date(b.ikReturned) - new Date(a.ikReturned));
+    document.getElementById('t-ik1').innerHTML = tableHtml(ik1, [
+      { h: 'Patient', fmt: r => esc(r.id) },
+      { h: 'Location', fmt: r => esc(r.loc) },
+      { h: 'Submitted', fmt: r => fmtDate(r.submitted) },
+    ], r => r._days != null && r._days < 7 ? 'row-fresh' : '');
+    document.getElementById('t-ik2').innerHTML = tableHtml(ik2, [
+      { h: 'Patient', fmt: r => esc(r.id) },
+      { h: 'Location', fmt: r => esc(r.loc) },
+      { h: 'Kit delivered', fmt: r => fmtDate(r.ikDelivered) },
+      { h: 'Days out', num: true, fmt: r => r._days },
+    ], r => rowClass(r._days, 7, 14));
+    document.getElementById('t-ik3').innerHTML = tableHtml(ik3, [
+      { h: 'Patient', fmt: r => esc(r.id) },
+      { h: 'Location', fmt: r => esc(r.loc) },
+      { h: 'Returned', fmt: r => fmtDate(r.ikReturned) },
+    ], r => r._days != null && r._days < 7 ? 'row-fresh' : '');
+    document.getElementById('n-ik1').textContent = ik1.length;
+    document.getElementById('n-ik2').textContent = ik2.length;
+    document.getElementById('n-ik3').textContent = ik3.length;
+    document.getElementById('b-ik').textContent = ik1.length + ik2.length;
+
+    // --- Tab 7: Bad impressions ---
+    const bad = inScope
+      .filter(p => p.badImpressionDate)
+      .map(p => ({ ...p, _days: daysSince(p.badImpressionDate) }))
+      .sort((a, b) => new Date(b.badImpressionDate) - new Date(a.badImpressionDate));
+    document.getElementById('t-badimp').innerHTML = tableHtml(bad, [
+      { h: 'Patient', fmt: r => esc(r.id) },
+      { h: 'Location', fmt: r => esc(r.loc) },
+      { h: 'Bad impression', fmt: r => fmtDate(r.badImpressionDate) },
+      { h: 'Days ago', num: true, fmt: r => r._days },
+      { h: 'New kit returned?', fmt: r => r.ikReturned && new Date(r.ikReturned) > new Date(r.badImpressionDate) ? '<span class="pill ok">yes</span>' : '<span class="pill bad">pending</span>' },
+    ], r => r._days < 7 ? 'row-fresh' : '');
+    document.getElementById('b-badimp').textContent = bad.length;
+
+    // --- KPI tiles ---
+    const unact3d = unact.filter(p => p._days > 3).length;
+    document.getElementById('kpi-unact').textContent = unact3d.toLocaleString();
+    document.getElementById('kpi-unord').textContent = unord.length.toLocaleString();
+    document.getElementById('kpi-preauth').textContent = preauth.length.toLocaleString();
+    document.getElementById('kpi-mfg').textContent = mfg.length.toLocaleString();
+    document.getElementById('kpi-bad').textContent = bad.length.toLocaleString();
+  }
+
+  function switchTab(name) {
+    document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.tab === name));
+    document.querySelectorAll('.panel').forEach(p => p.classList.toggle('active', p.id === 'panel-' + name));
+    document.querySelectorAll('.kpi').forEach(k => k.classList.toggle('active', k.dataset.tab === name));
+  }
+
+  setupScope();
+  document.getElementById('meta').textContent =
+    data.patients.length.toLocaleString() + ' patients across ' + data.scopes.locations.length + ' ' + data.account.name + ' locations';
+  document.getElementById('foot-gen').textContent = new Date(data.generatedAt).toLocaleString();
+  document.getElementById('scope-select').value = 'all';
+  document.getElementById('scope-select').addEventListener('change', render);
+
+  document.querySelectorAll('.tab').forEach(t => {
+    t.addEventListener('click', () => switchTab(t.dataset.tab));
+  });
+  document.querySelectorAll('.kpi').forEach(k => {
+    k.addEventListener('click', () => switchTab(k.dataset.tab));
+  });
+
+  render();
+})();
+</script>
+</body>
+</html>

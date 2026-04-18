@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>{{ACCOUNT_NAME}} — Executive Dashboard</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<style>
+  :root {
+    --sunlight: #FECF00;
+    --deep-sleep: #221D35;
+    --pillow: #FFFFFF;
+    --sky: #DDE4ED;
+    --linen: #F6ECE1;
+    --muted: #6B6778;
+    --border: #E5E1E9;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: var(--pillow); color: var(--deep-sleep); }
+  body {
+    font-family: Inter, system-ui, -apple-system, "Segoe UI", sans-serif;
+    font-size: 14px;
+    line-height: 1.45;
+  }
+  header.top {
+    background: var(--deep-sleep);
+    color: var(--pillow);
+    padding: 24px 32px;
+  }
+  header.top h1 {
+    margin: 0;
+    font-size: 22px;
+    font-weight: 600;
+    letter-spacing: 0.2px;
+  }
+  header.top h1 em {
+    font-family: Georgia, "Source Serif Pro", serif;
+    font-style: italic;
+    font-weight: 400;
+    border-bottom: 2px solid var(--sunlight);
+    padding-bottom: 1px;
+  }
+  header.top .meta {
+    font-size: 12px;
+    color: #B9B4C7;
+    margin-top: 6px;
+  }
+  .controls {
+    background: var(--linen);
+    border-bottom: 1px solid var(--border);
+    padding: 16px 32px;
+    display: flex;
+    gap: 32px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  .control-group { display: flex; align-items: center; gap: 8px; }
+  .control-group label {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--muted);
+  }
+  select {
+    background: var(--pillow);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 6px 10px;
+    font-size: 13px;
+    font-family: inherit;
+    color: var(--deep-sleep);
+    min-width: 160px;
+  }
+  .period-toggle { display: inline-flex; border: 1px solid var(--border); border-radius: 6px; overflow: hidden; }
+  .period-toggle button {
+    background: var(--pillow);
+    border: 0;
+    border-right: 1px solid var(--border);
+    padding: 6px 12px;
+    font-size: 13px;
+    font-family: inherit;
+    color: var(--deep-sleep);
+    cursor: pointer;
+  }
+  .period-toggle button:last-child { border-right: 0; }
+  .period-toggle button.active { background: var(--sunlight); font-weight: 600; }
+  main { padding: 24px 32px 48px; max-width: 1400px; margin: 0 auto; }
+  section { margin-bottom: 32px; }
+  h2.section {
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--muted);
+    margin: 0 0 12px;
+  }
+  .kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+  }
+  .kpi {
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 20px;
+    background: var(--pillow);
+  }
+  .kpi .label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--muted);
+    font-weight: 600;
+  }
+  .kpi .value {
+    font-size: 36px;
+    font-weight: 600;
+    margin: 6px 0 2px;
+    color: var(--deep-sleep);
+  }
+  .kpi .sub { font-size: 12px; color: var(--muted); }
+  .sla-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    background: var(--sky);
+    padding: 16px;
+    border-radius: 8px;
+  }
+  .sla .label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--deep-sleep);
+    font-weight: 600;
+    opacity: 0.7;
+  }
+  .sla .value {
+    font-size: 24px;
+    font-weight: 600;
+    margin-top: 2px;
+  }
+  .sla .sub { font-size: 11px; color: var(--muted); }
+  .chart-wrap {
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px;
+    background: var(--pillow);
+    height: 280px;
+  }
+  .tables-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+  }
+  .table-card {
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--pillow);
+    overflow: hidden;
+  }
+  .table-card .head {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+  }
+  .table-card .head h3 {
+    margin: 0;
+    font-size: 14px;
+    font-weight: 600;
+  }
+  .table-card .head .count {
+    font-size: 12px;
+    color: var(--muted);
+  }
+  .table-card.attention .head { border-left: 3px solid var(--sunlight); }
+  table { width: 100%; border-collapse: collapse; }
+  th, td { padding: 8px 16px; text-align: left; font-size: 13px; }
+  th {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--muted);
+    font-weight: 600;
+    border-bottom: 1px solid var(--border);
+    background: #FAFAFC;
+    position: sticky;
+    top: 0;
+    z-index: 1;
+  }
+  .t-scroll {
+    max-height: 142px;
+    overflow-y: auto;
+  }
+  tr + tr td { border-top: 1px solid #F0EDF2; }
+  td.num { text-align: right; font-variant-numeric: tabular-nums; }
+  .empty {
+    padding: 24px 16px;
+    text-align: center;
+    color: var(--muted);
+    font-size: 13px;
+  }
+  footer {
+    background: var(--linen);
+    padding: 16px 32px;
+    font-size: 12px;
+    color: var(--muted);
+    text-align: center;
+  }
+  @media (max-width: 900px) {
+    .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+    .sla-grid { grid-template-columns: 1fr; }
+    .tables-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<header class="top">
+  <h1>{{ACCOUNT_NAME}} <em>Executive Dashboard</em></h1>
+  <div class="meta" id="meta"></div>
+</header>
+
+<div class="controls">
+  <div class="control-group">
+    <label>Scope</label>
+    <select id="scope-select"></select>
+  </div>
+  <div class="control-group">
+    <label>Period</label>
+    <div class="period-toggle" id="period-toggle">
+      <button data-period="today">Today</button>
+      <button data-period="7d" class="active">7 days</button>
+      <button data-period="30d">30 days</button>
+      <button data-period="last-month">Last month</button>
+      <button data-period="90d">90 days</button>
+    </div>
+  </div>
+</div>
+
+<main>
+  <section>
+    <h2 class="section">KPIs (period-scoped)</h2>
+    <div class="kpi-grid">
+      <div class="kpi"><div class="label">Submitted</div><div class="value" id="kpi-submitted">—</div><div class="sub">new patients in period</div></div>
+      <div class="kpi"><div class="label">Ordered</div><div class="value" id="kpi-ordered">—</div><div class="sub">devices ordered in period</div></div>
+      <div class="kpi"><div class="label">Not Ordered</div><div class="value" id="kpi-unordered">—</div><div class="sub">activated, awaiting order (all-time)</div></div>
+      <div class="kpi"><div class="label">Delivered</div><div class="value" id="kpi-delivered">—</div><div class="sub">devices delivered in period</div></div>
+    </div>
+  </section>
+
+  <section>
+    <h2 class="section">Avg time per step (all-time, in scope)</h2>
+    <div class="sla-grid">
+      <div class="sla"><div class="label">Submit → Activate</div><div class="value" id="sla-activate">—</div><div class="sub" id="sla-activate-n"></div></div>
+      <div class="sla"><div class="label">Activate → Order</div><div class="value" id="sla-order">—</div><div class="sub" id="sla-order-n"></div></div>
+      <div class="sla"><div class="label">Order → Deliver</div><div class="value" id="sla-deliver">—</div><div class="sub" id="sla-deliver-n"></div></div>
+    </div>
+  </section>
+
+  <section>
+    <h2 class="section">Trend — submissions vs deliveries</h2>
+    <div class="chart-wrap"><canvas id="trend"></canvas></div>
+  </section>
+
+  <section>
+    <h2 class="section">Patient detail</h2>
+    <div class="tables-grid">
+      <div class="table-card">
+        <div class="head"><h3>Recently submitted</h3><span class="count" id="t-submitted-count"></span></div>
+        <div class="t-scroll" id="t-submitted"></div>
+      </div>
+      <div class="table-card attention">
+        <div class="head"><h3>Unactivated (submitted &gt;3d, no login)</h3><span class="count" id="t-unact-count"></span></div>
+        <div class="t-scroll" id="t-unact"></div>
+      </div>
+      <div class="table-card attention">
+        <div class="head"><h3>Not ordered (activated, consent hold)</h3><span class="count" id="t-unord-count"></span></div>
+        <div class="t-scroll" id="t-unord"></div>
+      </div>
+      <div class="table-card">
+        <div class="head"><h3>Recently delivered</h3><span class="count" id="t-del-count"></span></div>
+        <div class="t-scroll" id="t-del"></div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  Better days start with better sleep. — Generated <span id="foot-gen"></span>
+</footer>
+
+<script>
+/*__DATA__*/
+
+(function () {
+  const data = window.__DASHBOARD_DATA__;
+  if (!data) return;
+
+  const fmtDate = (iso) => {
+    if (!iso) return '—';
+    const d = new Date(iso);
+    return d.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+  };
+  const daysBetween = (a, b) => {
+    if (!a || !b) return null;
+    return (new Date(b) - new Date(a)) / (1000 * 60 * 60 * 24);
+  };
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  function periodRange(p) {
+    const end = new Date();
+    const start = new Date();
+    start.setHours(0, 0, 0, 0);
+    if (p === 'today') { /* start is today 00:00 */ }
+    else if (p === '7d') start.setDate(start.getDate() - 6);
+    else if (p === '30d') start.setDate(start.getDate() - 29);
+    else if (p === '90d') start.setDate(start.getDate() - 89);
+    else if (p === 'last-month') {
+      start.setDate(1);
+      start.setMonth(start.getMonth() - 1);
+      const e = new Date(start);
+      e.setMonth(e.getMonth() + 1);
+      e.setDate(0);
+      e.setHours(23, 59, 59, 999);
+      return { start, end: e };
+    }
+    return { start, end };
+  }
+
+  function inRange(iso, { start, end }) {
+    if (!iso) return false;
+    const t = new Date(iso).getTime();
+    return t >= start.getTime() && t <= end.getTime();
+  }
+
+  function setupScope() {
+    const sel = document.getElementById('scope-select');
+    const states = [...new Set(data.scopes.locations.map(l => l.state))].filter(s => s && s !== 'Unknown').sort();
+    const opts = [
+      { v: 'all', t: 'All ' + data.account.name },
+      ...states.map(s => ({ v: 'state:' + s, t: 'State — ' + s })),
+      ...data.scopes.locations.map(l => ({ v: 'loc:' + l.id, t: l.state && l.state !== 'Unknown' ? l.name + ' (' + l.state + ')' : l.name })),
+    ];
+    sel.innerHTML = opts.map(o => '<option value="' + o.v + '">' + o.t + '</option>').join('');
+  }
+
+  function filterByScope(patients, scope) {
+    if (scope === 'all') return patients;
+    if (scope.startsWith('state:')) {
+      const s = scope.slice(6);
+      return patients.filter(p => p.state === s);
+    }
+    if (scope.startsWith('loc:')) {
+      const id = scope.slice(4);
+      return patients.filter(p => p.locId === id);
+    }
+    return patients;
+  }
+
+  function avg(arr) {
+    if (!arr.length) return null;
+    return arr.reduce((a, b) => a + b, 0) / arr.length;
+  }
+
+  function renderKpis(inScope, range) {
+    const submitted = inScope.filter(p => inRange(p.submitted, range)).length;
+    const ordered = inScope.filter(p => p.ordered && inRange(p.orderedDate, range)).length;
+    const delivered = inScope.filter(p => inRange(p.delivered, range)).length;
+    const unordered = inScope.filter(p => p.activated && !p.ordered).length;
+    document.getElementById('kpi-submitted').textContent = submitted.toLocaleString();
+    document.getElementById('kpi-ordered').textContent = ordered.toLocaleString();
+    document.getElementById('kpi-unordered').textContent = unordered.toLocaleString();
+    document.getElementById('kpi-delivered').textContent = delivered.toLocaleString();
+  }
+
+  function renderSlas(inScope) {
+    const activateDays = inScope
+      .filter(p => p.submitted && p.activated)
+      .map(p => daysBetween(p.submitted, p.activated))
+      .filter(d => d !== null && d >= 0);
+    const orderDays = inScope
+      .filter(p => p.activated && p.orderedDate)
+      .map(p => daysBetween(p.activated, p.orderedDate))
+      .filter(d => d !== null && d >= 0);
+    const deliverDays = inScope
+      .filter(p => p.orderedDate && p.delivered)
+      .map(p => daysBetween(p.orderedDate, p.delivered))
+      .filter(d => d !== null && d >= 0);
+
+    const put = (id, arr) => {
+      const a = avg(arr);
+      document.getElementById(id).textContent = a === null ? '—' : a.toFixed(1) + ' d';
+      document.getElementById(id + '-n').textContent = 'n = ' + arr.length;
+    };
+    put('sla-activate', activateDays);
+    put('sla-order', orderDays);
+    put('sla-deliver', deliverDays);
+  }
+
+  let chart;
+  function renderChart(inScope, range) {
+    const days = [];
+    const msDay = 86400000;
+    for (let t = range.start.getTime(); t <= range.end.getTime(); t += msDay) {
+      days.push(new Date(t));
+    }
+    const submittedSeries = days.map(d => {
+      const key = d.toISOString().slice(0, 10);
+      return inScope.filter(p => p.submitted && p.submitted.slice(0, 10) === key).length;
+    });
+    const deliveredSeries = days.map(d => {
+      const key = d.toISOString().slice(0, 10);
+      return inScope.filter(p => p.delivered && p.delivered.slice(0, 10) === key).length;
+    });
+    const labels = days.map(d => d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }));
+    if (chart) chart.destroy();
+    chart = new Chart(document.getElementById('trend'), {
+      type: 'line',
+      data: {
+        labels,
+        datasets: [
+          { label: 'Submitted', data: submittedSeries, borderColor: '#221D35', backgroundColor: 'rgba(34,29,53,0.08)', tension: 0.25, fill: true },
+          { label: 'Delivered', data: deliveredSeries, borderColor: '#FECF00', backgroundColor: 'rgba(254,207,0,0.15)', tension: 0.25, fill: true },
+        ],
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { position: 'bottom' } },
+        scales: { y: { beginAtZero: true, ticks: { precision: 0 } } },
+      },
+    });
+  }
+
+  function tableHtml(rows, cols) {
+    if (!rows.length) return '<div class="empty">No records in this view.</div>';
+    const head = '<tr>' + cols.map(c => '<th>' + c.h + '</th>').join('') + '</tr>';
+    const body = rows.map(r =>
+      '<tr>' + cols.map(c => '<td' + (c.num ? ' class="num"' : '') + '>' + (c.fmt ? c.fmt(r) : r[c.k]) + '</td>').join('') + '</tr>'
+    ).join('');
+    return '<table><thead>' + head + '</thead><tbody>' + body + '</tbody></table>';
+  }
+
+  function renderTables(inScope, range) {
+    const now = Date.now();
+    const three = 3 * 86400000;
+
+    const submitted = inScope
+      .filter(p => inRange(p.submitted, range))
+      .sort((a, b) => new Date(b.submitted) - new Date(a.submitted))
+      .slice(0, 50);
+    document.getElementById('t-submitted').innerHTML = tableHtml(submitted, [
+      { h: 'Patient', k: 'id' },
+      { h: 'Location', k: 'loc' },
+      { h: 'Submitted', fmt: r => fmtDate(r.submitted) },
+    ]);
+    document.getElementById('t-submitted-count').textContent = submitted.length + ' shown';
+
+    const unact = inScope
+      .filter(p => p.submitted && !p.activated && (now - new Date(p.submitted).getTime()) > three)
+      .sort((a, b) => new Date(b.submitted) - new Date(a.submitted))
+      .slice(0, 50);
+    document.getElementById('t-unact').innerHTML = tableHtml(unact, [
+      { h: 'Patient', k: 'id' },
+      { h: 'Location', k: 'loc' },
+      { h: 'Submitted', fmt: r => fmtDate(r.submitted) },
+      { h: 'Days', num: true, fmt: r => Math.floor((now - new Date(r.submitted).getTime()) / 86400000) },
+    ]);
+    document.getElementById('t-unact-count').textContent = unact.length + ' shown';
+
+    const unord = inScope
+      .filter(p => p.activated && !p.ordered)
+      .sort((a, b) => new Date(b.activated) - new Date(a.activated))
+      .slice(0, 50);
+    document.getElementById('t-unord').innerHTML = tableHtml(unord, [
+      { h: 'Patient', k: 'id' },
+      { h: 'Location', k: 'loc' },
+      { h: 'Activated', fmt: r => fmtDate(r.activated) },
+      { h: 'Days', num: true, fmt: r => Math.floor((now - new Date(r.activated).getTime()) / 86400000) },
+    ]);
+    document.getElementById('t-unord-count').textContent = unord.length + ' shown';
+
+    const del = inScope
+      .filter(p => inRange(p.delivered, range))
+      .sort((a, b) => new Date(b.delivered) - new Date(a.delivered))
+      .slice(0, 50);
+    document.getElementById('t-del').innerHTML = tableHtml(del, [
+      { h: 'Patient', k: 'id' },
+      { h: 'Location', k: 'loc' },
+      { h: 'Delivered', fmt: r => fmtDate(r.delivered) },
+    ]);
+    document.getElementById('t-del-count').textContent = del.length + ' shown';
+  }
+
+  function render() {
+    const scope = document.getElementById('scope-select').value;
+    const period = document.querySelector('#period-toggle .active').dataset.period;
+    const range = periodRange(period);
+    const inScope = filterByScope(data.patients, scope);
+    renderKpis(inScope, range);
+    renderSlas(inScope);
+    renderChart(inScope, range);
+    renderTables(inScope, range);
+  }
+
+  setupScope();
+  document.getElementById('meta').textContent =
+    data.patients.length.toLocaleString() + ' patients across ' + data.scopes.locations.length + ' ' + data.account.name + ' locations';
+  document.getElementById('foot-gen').textContent = new Date(data.generatedAt).toLocaleString();
+  document.getElementById('scope-select').value = 'all';
+  document.getElementById('scope-select').addEventListener('change', render);
+  document.querySelectorAll('#period-toggle button').forEach(b => {
+    b.addEventListener('click', () => {
+      document.querySelectorAll('#period-toggle button').forEach(x => x.classList.remove('active'));
+      b.classList.add('active');
+      render();
+    });
+  });
+  render();
+})();
+</script>
+</body>
+</html>
